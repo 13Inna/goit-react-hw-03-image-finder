@@ -1,103 +1,49 @@
-import React,{useState} from "react";
-import css from "./Searchbar.module.css";
-import { toast } from "react-toastify";
-import { FcSearch } from "react-icons/fc";
+import './Searchbar.css';
+import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 
+import { ImSearch } from 'react-icons/im';
 
+class Searchbar extends Component {
+  state = {
+    inputData: '',
+  };
+  onChangeInput = e => {
+    this.setState({ inputData: e.currentTarget.value.toLowerCase() });
+  };
 
-export default function Searchbar({handleSearch}) {
-  const [search, setSearch] = useState("");
-
-
-  const handleValueChange = (e) => {
-    setSearch(e.target.value);
-  }
-  const handleSubmit = (e) => {
+  handleSubmit = e => {
     e.preventDefault();
-    if (search.trim() === "") {
-      toast.error("Будь ласка, введіть запит!");
-      return;
-    }
-    handleSearch(search);
-    setSearch("");
+    this.props.onSubmit(this.state.inputData);
+    this.setState({ inputData: '' });
+  };
+
+  render() {
+    const { inputData } = this.state.inputData;
+    return (
+      <header className="Searchbar">
+        <form className="SearchForm" onSubmit={this.handleSubmit}>
+          <button type="submit" className="SearchForm-button">
+            <ImSearch size={25} />
+          </button>
+
+          <input
+            className="SearchForm-input"
+            name="inputData"
+            value={inputData}
+            onChange={this.onChangeInput}
+            type="text"
+            autoComplete="off"
+            autoFocus
+            placeholder="Search images and photos"
+          />
+        </form>
+      </header>
+    );
   }
-
-
- return (        
-      <header className={css.searchbar}>
-      <form className={css.form} onSubmit={handleSubmit}>
-      
-      <button type="submit" className={css.button}>
-      <span className={css.button__label}><FcSearch className={css.searchbar__icon}/></span>
-      </button>
-
-      <input
-    className={css.input}
-    type="text"
-    autoComplete="off"
-    autoFocus
-    placeholder="Пошук картинок та фото"
-    value={search}
-    onChange={handleValueChange}/>
-    </form>
-    </header>
-  );
-}
-Searchbar.propTypes = {
-  handleSearch: PropTypes.func.isRequired,
-  search: PropTypes.string
 }
 
-
-// export default class Searchbar extends Component {
-
-//     state = {
-//         search: ""
-//     }
-
-//     handleValueChange = (e) => {
-//         this.setState({ search: e.target.value.toLowerCase() });
-//     }
-
-//     handleSubmit = (e) => {
-//         e.preventDefault();
-//         if (this.state.search.trim() === "") {
-//             toast.error("Будь ласка, введіть запит!");
-//             return;
-//         }
-//         this.props.handleSearch(this.state.search);
-//         this.setState({ search: "" });
-//     }
-
-
-
-    
-
-//     render() {
-//         const { search } = this.state;
-//         const { handleValueChange, handleSubmit } = this;
-//         return (
-        
-//       <header className={css.searchbar}>
-//       <form className={css.form} onSubmit={handleSubmit}>
-      
-//       <button type="submit" className={css.button}>
-//       <span className={css.button__label}><FcSearch className={css.searchbar__icon}/></span>
-//       </button>
-
-//       <input
-//     className={css.input}
-//     type="text"
-//     autoComplete="off"
-//     autoFocus
-//     placeholder="Пошук картинок та фото"
-//     value={search}
-//     onChange={handleValueChange}/>
-//     </form>
-//     </header>
-//     );
-//   }
-// }
-
-
+export default Searchbar;
+Searchbar.propType = {
+  onSubmit: PropTypes.func.isRequired,
+};
