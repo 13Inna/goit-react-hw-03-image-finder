@@ -1,26 +1,14 @@
-
-.preLoader{
-    font-family: 'Rubik One', sans-serif;
-    font-size: 50px;
-    text-transform: uppercase;
-    text-shadow: -4px -4px 0px #01ff09;
-    background: repeating-linear-gradient(45deg, #45e728, #45e728 1px, white 2px, white 3px);
-    background-clip: text;
-    color: transparent;
-    text-align: center;
-    margin-top: 20%;
-}
-
-.ImageGallery{
-
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    align-items: center;
-
-    margin-top: 20px;
+.ImageGallery {
+    display: grid;
+    max-width: calc(100vw - 48px);
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    grid-gap: 16px;
+    margin-top: 0;
+    margin-bottom: 0;
+    padding: 0;
     list-style: none;
-   padding: 10px;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .loader{

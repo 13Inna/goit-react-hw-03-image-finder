@@ -11,7 +11,7 @@
     cursor: pointer;
     border-radius: 5px;
     text-align: center;
-    transition: background .3s ease-in-out;
+   
 }
 .button:hover{
     background: linear-gradient(to right, #55931e, #20bd2b);

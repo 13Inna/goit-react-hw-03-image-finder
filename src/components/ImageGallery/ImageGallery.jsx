@@ -1,21 +1,28 @@
-import ImageGalleryItem from '../ImageGalleryItem';
-import './ImageGallery.css';
+import ImageGalleryItem from '../ImageGalleryItem/ImageGalleryItem';
+import css from './ImageGallery.module.css';
 import PropTypes from 'prop-types';
 
-function ImageGallery({ items }) {
+export default function ImageGallery({ images, openModal }) {
   return (
-    <>
-      <ul className="ImageGallery">
-        {items.map(item => (
-          <ImageGalleryItem key={item.id} item={item} />
-        ))}
-      </ul>
-    </>
+    <ul className={css.ImageGallery}>
+      {images.map(({ id, webformatURL }, index) => (
+        <ImageGalleryItem
+          key={id}
+          webformatURL={webformatURL}
+          index={index}
+          openModal={openModal}
+        />
+      ))}
+    </ul>
   );
 }
 
-export default ImageGallery;
-
 ImageGallery.propTypes = {
-  items: PropTypes.array,
+  openModal: PropTypes.func.isRequired,
+  images: PropTypes.arrayOf(
+    PropTypes.shape({
+      id: PropTypes.number.isRequired,
+      webformatURL: PropTypes.string.isRequired,
+    })
+  ),
 };

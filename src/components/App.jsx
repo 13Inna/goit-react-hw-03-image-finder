@@ -1,101 +1,96 @@
-import React, { Component } from 'react';
-import Button from './Button';
-import ImageGallery from './ImageGallery';
-import './App.css';
-import { fetchImages } from './fetchImages/fetchImages';
-import Searchbar from './Searchbar';
-import Notiflix from 'notiflix';
-import Loader from './Loader';
+import Searchbar from './Searchbar/Searchbar';
+import ImageGallery from './ImageGallery/ImageGallery';
+import fetchImages from '../services/fetchImages';
+import Modal from './Modal/Modal';
+import Loader from './Loader/Loader';
+import Button from './Button/Button';
+import css from './App.module.css';
+import { Component } from 'react';
+import { ToastContainer, toast } from 'react-toastify';
+ import 'react-toastify/dist/ReactToastify.css';
 
-let page = 1;
-
-class App extends Component {
+export class App extends Component {
   state = {
-    inputData: '',
-    items: [],
-
-    status: 'idle',
-    totalHits: 0,
+    searchData: '',
+    images: [],
+    page: 0,
+    largeImage: '',
+    showModal: false,
+    isLoading: false,
+    error: null,
   };
 
-  handleSubmit = async inputData => {
-    page = 1;
-    if (inputData.trim() === '') {
-      Notiflix.Notify.info('You cannot search by empty field, try again.');
-      return;
-    } else {
+  componentDidUpdate(prevProps, prevState) {
+    const prevPage = prevState.page;
+    const prevSearchData = prevState.searchData;
+    const { searchData, page, images } = this.state;
+    if (prevPage !== page || prevSearchData !== searchData) {
       try {
-        this.setState({ status: 'pending' });
-        const { totalHits, hits } = await fetchImages(inputData, page);
-        if (hits.length < 1) {
-          this.setState({ status: 'idle' });
-          Notiflix.Notify.failure(
-            'Sorry, there are no images matching your search query. Please try again.'
-          );
-        } else {
-          this.setState({
-            items: hits,
-            inputData,
-            totalHits: totalHits,
-            status: 'resolved',
-          });
-        }
+        this.setState({ isLoading: true });
+        const response = fetchImages(searchData, page);
+        response.then(data => {
+          data.data.hits.length === 0
+            ? toast.error('Nothing found')
+            : data.data.hits.forEach(({ id, webformatURL, largeImageURL }) => {
+                !images.some(image => image.id === id) &&
+                  this.setState(({ images }) => ({
+                    images: [...images, { id, webformatURL, largeImageURL }],
+                  }));
+              });
+          this.setState({ isLoading: false });
+        });
       } catch (error) {
-        this.setState({ status: 'rejected' });
+        this.setState({ error, isLoading: false });
+      } finally {
       }
     }
-  };
-  onNextPage = async () => {
-    this.setState({ status: 'pending' });
+  }
 
-    try {
-      const { hits } = await fetchImages(this.state.inputData, (page += 1));
-      this.setState(prevState => ({
-        items: [...prevState.items, ...hits],
-        status: 'resolved',
-      }));
-    } catch (error) {
-      this.setState({ status: 'rejected' });
+  onSubmit = searchData => {
+    if (searchData.trim() === '') {
+      return toast.error('Enter the meaning for search');
+    } else if (searchData === this.state.searchData) {
+      return;
     }
+    this.setState({
+      searchData: searchData,
+      page: 1,
+      images: [],
+    });
   };
+
+  nextPage = () => {
+    this.setState(({ page }) => ({ page: page + 1 }));
+  };
+
+  openModal = index => {
+    this.setState(({ images }) => ({
+      showModal: true,
+      largeImage: images[index].largeImageURL,
+    }));
+  };
+
+  toggleModal = () => {
+    this.setState(({ showModal }) => ({ showModal: !showModal }));
+  };
+
   render() {
-    const { totalHits, status, items } = this.state;
-    if (status === 'idle') {
-      return (
-        <div className="App">
-          <Searchbar onSubmit={this.handleSubmit} />
-        </div>
-      );
-    }
-    if (status === 'pending') {
-      return (
-        <div className="App">
-          <Searchbar onSubmit={this.handleSubmit} />
-          <ImageGallery page={page} items={this.state.items} />
-          <Loader />
-          {totalHits > 12 && <Button onClick={this.onNextPage} />}
-        </div>
-      );
-    }
-    if (status === 'rejected') {
-      return (
-        <div className="App">
-          <Searchbar onSubmit={this.handleSubmit} />
-          <p>Something wrong, try later</p>
-        </div>
-      );
-    }
-    if (status === 'resolved') {
-      return (
-        <div className="App">
-          <Searchbar onSubmit={this.handleSubmit} />
-          <ImageGallery page={page} items={this.state.items} />
-          {totalHits > 12 && totalHits > items.length && (
-            <Button onClick={this.onNextPage} />
-          )}
-        </div>
-      );
-    }
+    const { toggleModal, openModal, nextPage, onSubmit } = this;
+    const { images, isLoading, largeImage, showModal } = this.state;
+
+    return (
+      <div className={css.App}>
+        <Searchbar onSubmit={onSubmit} />
+        {images.length !== 0 && (
+          <ImageGallery images={images} openModal={openModal} />
+        )}
+        {showModal && (
+          <Modal toggleModal={toggleModal} largeImage={largeImage} />
+        )}
+        {isLoading && <Loader />}
+        <ToastContainer autoClose={2500} />
+        {images.length >= 12 && <Button nextPage={nextPage} />}
+      </div>
+    );
   }
 }
-export default App;

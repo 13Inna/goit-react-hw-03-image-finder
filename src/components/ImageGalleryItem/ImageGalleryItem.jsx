@@ -1,34 +1,21 @@
-import './ImageGalleryItem.css';
-import Modal from '../Modal';
-import React, { Component } from 'react';
+import css from './ImageGalleryItem.module.css';
 import PropTypes from 'prop-types';
 
-class ImageGalleryItem extends Component {
-  state = {
-    shownModal: false,
-  };
-  onModal = () => {
-    this.setState(({ shownModal }) => ({ shownModal: !shownModal }));
-  };
-  render() {
-    const { item } = this.props;
-    const { webformatURL } = item;
-    return (
-      <li className="ImageGalleryItem">
-        <img
-          onClick={this.onModal}
-          className="ImageGalleryItem-image"
-          src={webformatURL}
-          alt="img"
-        />
-        {this.state.shownModal && <Modal onClose={this.onModal} image={item} />}
-      </li>
-    );
-  }
+export default function ImageGalleryItem({ webformatURL, index, openModal }) {
+  return (
+    <li className={css.ImageGalleryItem}>
+      <img
+        className={css.ImageGalleryItemImage}
+        src={webformatURL}
+        onClick={() => openModal(index)}
+        alt=""
+      />
+    </li>
+  );
 }
 
 ImageGalleryItem.propTypes = {
-  item: PropTypes.object,
+  index: PropTypes.number.isRequired,
+  webformatURL: PropTypes.string.isRequired,
+  openModal: PropTypes.func.isRequired,
 };
-
-export default ImageGalleryItem;
